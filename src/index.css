@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@keyframes moveClouds {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(1100%);
+    }
+  }
+  
+  .cloud {
+    position: absolute;
+    background: url('../public/assets/Cloud-edited.png') no-repeat center;
+    background-size: cover;
+    width: 1000px; 
+    height: 200px; 
+  }
+  
+  .cloud1 {
+    animation: moveClouds 60s linear infinite;
+    top: 10%;
+    left: -200px; 
+  }
+  
+  .cloud2 {
+    animation: moveClouds 70s linear infinite;
+    top: 40%;
+    left: -200px; 
+    opacity: 0.5;
+  }
+  
+  .cloud3 {
+    animation: moveClouds 80s linear infinite;
+    top: 70%;
+    left: -200px; 
+    opacity: 0.7;
+  }
+
+  .color-burn {
+    mix-blend-mode: color-burn;
+  }
+
+
+  .submitBTN {
+    background: linear-gradient(90deg, orange 50%, red 50%);
+    background-size: 200% 100%;
+    background-position: right;
+    transition: background-position 0.5s ease-in-out;
+  }
+  
+  .submitBTN:hover {
+    background-position: left;
+    color: black;
+  }
