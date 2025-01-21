@@ -344,10 +344,10 @@ function App() {
         <footer>
               <div className='bg-teal-600 w-full flex flex-col lg:flex-row items-center'>
                   <button onClick={() => scrollToTarget(main)} className='text-white font-medium hover:text-red-600 text-6xl lg:mt-0 mt-8 mx-10'><i>Yash Gupta</i></button>
-                <div className='mx-20 lg:block flex flex-col my-10'>
-                  <button onClick={() => scrollToTarget(Projects)} className='mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Projects</button>
-                  <button onClick={() => scrollToTarget(Skills)} className='mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Skills</button>
-                  <button onClick={() => scrollToTarget(Contact)} className='mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Contact me</button>
+                <div className='lg:mx-20 lg:block flex flex-col my-10'>
+                  <button onClick={() => scrollToTarget(Projects)} className='lg:mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Projects</button>
+                  <button onClick={() => scrollToTarget(Skills)} className='lg:mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Skills</button>
+                  <button onClick={() => scrollToTarget(Contact)} className='lg:mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Contact me</button>
                 </div>
                 <div className='lg:absolute lg:right-64 lg:my-0 my-6'>
                   <div className="card">
