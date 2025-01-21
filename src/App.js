@@ -86,10 +86,10 @@ function App() {
   return (
   <div className='p-0 m-0 bg-blue-200 overflow-auto'>
 
-    <nav className='font-bold lg:text-right lg:pr-52 lg:py-10 py-5 px-1 w-full text-center fixed top-0 left-0 z-10 backdrop-blur-lg lg:text-2xl text-md'>
-      <button onClick={() => scrollToTarget(Projects)} className='mx-5 text-blue-500 hover:text-red-600'>Projects</button>
-      <button onClick={() => scrollToTarget(Skills)} className='mx-5 text-blue-500 hover:text-red-600'>Skills</button>
-      <button onClick={() => scrollToTarget(Contact)} className='mx-5 text-blue-500 hover:text-red-600'>Contact me</button>
+    <nav className='font-bold lg:text-right lg:block flex justify-evenly lg:pr-52 lg:py-10 py-5 px-1 w-full text-center fixed top-0 left-0 z-10 backdrop-blur-lg lg:text-2xl text-md'>
+      <button onClick={() => scrollToTarget(Projects)} className='lg:mx-5 text-blue-500 hover:text-red-600'>Projects</button>
+      <button onClick={() => scrollToTarget(Skills)} className='lg:mx-5 text-blue-500 hover:text-red-600'>Skills</button>
+      <button onClick={() => scrollToTarget(Contact)} className='lg:mx-5 text-blue-500 hover:text-red-600'>Contact me</button>
     </nav>
 
     <div className = 'lg:min-h-screen mt-20 lg:mt-36 lg:p-0 pb-16 w-auto' ref = {main}>
