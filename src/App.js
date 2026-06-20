@@ -1,375 +1,587 @@
 import React from 'react';
 import { useEffect, useState, useRef } from 'react';
-import { FaLink } from 'react-icons/fa';
 import emailjs from '@emailjs/browser';
 
-
 function App() {
+  const heroRef = useRef(null);
+  const projectsRef = useRef(null);
+  const skillsRef = useRef(null);
+  const experienceRef = useRef(null);
+  const contactRef = useRef(null);
 
-  const main = useRef(null)
-  const Projects = useRef(null);
-  const Skills = useRef(null);
-  const Contact = useRef(null);
-
-  // Function to scroll to a specific target element
-  const scrollToTarget = (ref) => {
+  const scrollTo = (ref) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
+  const roles = ["Software Developer.", "Backend Engineer.", "Full-Stack Developer.", "Python Developer.", "Problem Solver."];
+  const [displayed, setDisplayed] = useState("");
+  const [roleIdx, setRoleIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const speed = deleting ? 40 : 90;
+    const timer = setTimeout(() => {
+      if (!deleting && charIdx < roles[roleIdx].length) {
+        setDisplayed(prev => prev + roles[roleIdx][charIdx]);
+        setCharIdx(c => c + 1);
+      } else if (!deleting && charIdx === roles[roleIdx].length) {
+        setTimeout(() => setDeleting(true), 1500);
+      } else if (deleting && charIdx > 0) {
+        setDisplayed(prev => prev.slice(0, -1));
+        setCharIdx(c => c - 1);
+      } else {
+        setDeleting(false);
+        setRoleIdx(r => (r + 1) % roles.length);
+      }
+    }, speed);
+    return () => clearTimeout(timer);
+  }, [charIdx, deleting, roleIdx]);
+
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const form = useRef();
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState(false)
+
+  const service_id = process.env.REACT_APP_EMAIL_JS_SERVICE_ID
+  const template_id = process.env.REACT_APP_EMAIL_JS_TEMPLATE_ID
+  const api_key = process.env.REACT_APP_EMAIL_JS_API_KEY
 
   const sendEmail = (e) => {
-    e.preventDefault();
-
+    e.preventDefault()
+    setSending(true)
     emailjs.sendForm(
-      'service_jx4w7qn', //Service_Id
-      'template_rtg1gov', //Template_ID
-      form.current,
-      'tlUxUJD0MUhCI8kNE' //Public_key
-    )
-    .then((result) => {
-        console.log(result.text);
-        alert("Email sent successfully!");
-        form.current.reset()
-    }, (error) => {
-        console.log(error.text);
-        alert("Failed to send email.");
-    });
-  };
+      service_id,
+      template_id,
+      form.current, {
+      publicKey: api_key,
+    }
+    ).then(() => {
+      setSent(true)
+      setSending(false)
+      form.current.reset()
+    }).catch(() => {
+      setError(true)
+      setSending(false)
+    })
+  }
 
-  const sentences = [
-    "Web developer. ",
-    "Frontend Developer. ",
-    "Backend Developer. ",
-    "Coder."
+  const skills = [
+    { name: "Python", icon: "🐍", level: 90 },
+    { name: "FastAPI", icon: "⚡", level: 85 },
+    { name: "Django", icon: "🎸", level: 80 },
+    { name: "React.js", icon: "⚛️", level: 82 },
+    { name: "JavaScript", icon: "🟨", level: 80 },
+    { name: "Node.js", icon: "🟩", level: 72 },
+    { name: "Docker", icon: "🐳", level: 75 },
+    { name: "Redis", icon: "🔴", level: 70 },
+    { name: "MongoDB", icon: "🍃", level: 74 },
+    { name: "MySQL", icon: "🗄️", level: 76 },
+    { name: "ClickHouse", icon: "🏠", level: 68 },
+    { name: "C++", icon: "⚙️", level: 65 },
+    { name: "Tailwind CSS", icon: "🎨", level: 85 },
+    { name: "Git / GitHub", icon: "🐙", level: 88 },
+  ]
+
+  const experience = [
+    {
+      company: "Finesse Stock Broking Service Pvt. Ltd.",
+      role: "Associate Software Development Engineer",
+      period: "Nov 2025 - Present",
+      location: "Delhi, India",
+      points: [
+        "Processed 22,000+ crore rows of financial time-series data using Pandas and NumPy with auto-restart on failure, ensuring zero data loss in production.",
+        "Maintained and optimized Redis clusters and ClickHouse columnar database instances deployed via Docker on Ubuntu, improving query throughput for real-time analytics.",
+        "Built FastAPI-based backtesting software for algorithmic trading strategies; engineered multi-dimensional matrix computation pipelines to accelerate indicator calculations.",
+        "Developed scalable data ingestion pipelines for time-series databases handling high-velocity live market feeds with fault-tolerance and high reliability."
+      ]
+    },
+    {
+      company: "Appz Global Tech Pvt. Ltd.",
+      role: "Intern → Python Developer",
+      period: "Mar 2025 - Sep 2025",
+      location: "Noida, India",
+      points: [
+        "Promoted to Python Developer within 4 months; designed and maintained backend infrastructure for enterprise Attendance and Parking Management Systems.",
+        "Built REST API endpoints integrating face recognition for automated attendance and ANPR for vehicle access control.",
+        "Implemented automation scripts for real-time market data processing."
+      ]
+    }
   ];
 
-  const [currentSentence, setCurrentSentence] = useState("");
-  const [sentenceIndex, setSentenceIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    const typingInterval = setInterval(() => {
-      if (isDeleting) {
-
-        if (charIndex > 0) {
-          setCurrentSentence(prev => prev.slice(0, -1));
-          setCharIndex(prev => prev - 1);
-        } else {
-          setIsDeleting(false);
-          setSentenceIndex(prev => (prev + 1) % sentences.length);
-        }
-      } else {
-        if (charIndex < sentences[sentenceIndex].length) {
-          setCurrentSentence(prev => prev + sentences[sentenceIndex][charIndex]);
-          setCharIndex(prev => prev + 1);
-        } else {
-          setIsDeleting(true);
-        }
-      }
-    }, isDeleting ? 50 : 100); 
-
-    return () => clearInterval(typingInterval);
-  }, [charIndex, sentenceIndex, isDeleting]);
-
-
-  useEffect(() => {
-    if (charIndex === 0 && currentSentence === "" && isDeleting) {
-      const delay = setTimeout(() => {}, 3000); 
-      return () => clearTimeout(delay);
+  const projects = [
+    {
+      name: "Fatha - Billing & Account Management",
+      tech: ["Python", "PyInstaller", ".NET 8", "CSV"],
+      desc: "Fully portable, zero-database billing desktop app persisting data via structured CSV files; packaged as a single executable via PyInstaller for one-click deployment. Integrated Windows Native Share dialog via a C# ShareBridge component.",
+      github: "https://github.com/yash-Devlop/Fatha",
+      live: null,
+    },
+    {
+      name: "Appartelle - Real Estate Platform",
+      tech: ["Django", "MySQL", "JavaScript", "HTML/CSS"],
+      desc: "Full-stack real estate web app with apartment listings, visit scheduling, and OTP-based 2FA. Role-based admin panel for property managers with CRUD operations, booking management, and a responsive mobile-friendly UI.",
+      github: "https://github.com/yash-Devlop/real_estate",
+      live: null,
+    },
+    {
+      name: "Frags - E-Commerce Platform",
+      tech: ["React.js", "Express.js", "Node.js", "MongoDB", "Tailwind CSS"],
+      desc: "Responsive E-commerce website with buy/sell functionality, user account creation, and full MERN stack implementation. Backend via Express.js and frontend using React.js with Tailwind CSS.",
+      github: "https://github.com/yash-Devlop/Frags-1",
+      live: "https://frags-1.vercel.app/",
+    },
+    {
+      name: "Popcorn - Movie Trailer App",
+      tech: ["React.js", "Node.js", "Tailwind CSS"],
+      desc: "Responsive movie trailer watching website where users can discover and watch trailers of the latest hits and releases. Clean UI with smooth navigation and mobile-first design.",
+      github: "https://github.com/yash-Devlop/popcorn1-main",
+      live: "https://popcorn1-main.vercel.app",
     }
-  }, [charIndex, currentSentence, isDeleting]);
+  ];
 
   return (
-  <div className='p-0 m-0 bg-blue-200 overflow-auto'>
+    <div style={{ background: '#0a0a0a', color: '#f5f5f5', fontFamily: "'Inter', 'Segoe UI', sans-serif", overflowX: 'hidden' }}>
 
-    <nav className='font-bold lg:text-right lg:block flex justify-evenly lg:pr-52 lg:py-10 py-5 px-1 w-full text-center fixed top-0 left-0 z-10 backdrop-blur-lg lg:text-2xl text-md'>
-      <button onClick={() => scrollToTarget(Projects)} className='lg:mx-5 text-blue-500 hover:text-red-600'>Projects</button>
-      <button onClick={() => scrollToTarget(Skills)} className='lg:mx-5 text-blue-500 hover:text-red-600'>Skills</button>
-      <button onClick={() => scrollToTarget(Contact)} className='lg:mx-5 text-blue-500 hover:text-red-600'>Contact me</button>
-    </nav>
+      {/* NAV */}
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        padding: '1rem 3rem',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: scrolled ? 'rgba(10,10,10,0.95)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        borderBottom: scrolled ? '1px solid #1f1f1f' : 'none',
+        transition: 'all 0.3s ease'
+      }}>
+        <button onClick={() => scrollTo(heroRef)} style={{ fontWeight: 700, fontSize: '1.25rem', color: '#f97316', letterSpacing: '-0.02em', background: 'none', border: 'none', cursor: 'pointer' }}>
+          YG<span style={{ color: '#f5f5f5' }}>.</span>
+        </button>
+        <div style={{ display: 'flex', gap: '2rem' }}>
+          {[['Experience', experienceRef], ['Projects', projectsRef], ['Skills', skillsRef], ['Contact', contactRef]].map(([label, ref]) => (
+            <button key={label} onClick={() => scrollTo(ref)} style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#a3a3a3', fontSize: '0.9rem', fontWeight: 500,
+              transition: 'color 0.2s', letterSpacing: '0.02em'
+            }}
+              onMouseEnter={e => e.target.style.color = '#f97316'}
+              onMouseLeave={e => e.target.style.color = '#a3a3a3'}
+            >{label}</button>
+          ))}
+        </div>
+      </nav>
 
-    <div className = 'lg:min-h-screen mt-20 lg:mt-36 lg:p-0 pb-16 w-auto' ref = {main}>
-      
+      {/* HERO */}
+      <section ref={heroRef} style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: '0 5%', paddingTop: '80px',
+        position: 'relative', overflow: 'hidden'
+      }}>
+        {/* Grid bg */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'linear-gradient(rgba(249,115,22,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.04) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)'
+        }} />
 
-        <h2 className='text-center lg:text-left lg:px-20 py-3 lg:text-8xl text-bold text-4xl'>
-          <i> Yash Gupta </i>
-        </h2>
-      <div className="">
-        <div className='lg:px-32 px-4 lg:py-10 py-3'>
-          <p className='lg:text-6xl text-2xl py-2'>Hi user!</p>
-          <p className = 'lg:text-6xl text-2xl lg:py-10 py-2 '>I am a <span className = 'text-blue-700'>{currentSentence}</span></p>
-          <div className = 'lg:text-2xl text-md font-thin lg:py-5 py-6 '>
-            <p>I am a software developer this is my portofolio website.</p>
-            <p>Here you would embark towards my journey as a software developer.</p>
+        {/* Orange glow */}
+        <div style={{
+          position: 'absolute', top: '20%', left: '-10%',
+          width: '500px', height: '500px',
+          background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)',
+          pointerEvents: 'none'
+        }} />
+
+        <div style={{ position: 'relative', maxWidth: '900px' }}>
+          {/* Terminal line */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            background: '#141414', border: '1px solid #2a2a2a',
+            borderRadius: '4px', padding: '6px 14px', marginBottom: '2rem',
+            fontSize: '0.8rem', color: '#a3a3a3', fontFamily: 'monospace'
+          }}>
+            <span style={{ color: '#f97316' }}>●</span>
+            <span style={{ color: '#fbbf24' }}>●</span>
+            <span style={{ color: '#34d399' }}>●</span>
+            <span style={{ marginLeft: '8px' }}>~/portfolio</span>
+            <span style={{ color: '#f97316' }}>$</span>
+            <span>whoami</span>
+          </div>
+
+          <p style={{ color: '#f97316', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '1rem' }}>
+            Hello, World — I'm
+          </p>
+
+          <h1 style={{
+            fontSize: 'clamp(3rem, 8vw, 6.5rem)', fontWeight: 800,
+            lineHeight: 1.05, marginBottom: '1.5rem', letterSpacing: '-0.03em'
+          }}>
+            Yash
+            <br />
+            <span style={{ position: 'relative', display: 'inline-block' }}>
+              Gupta
+              <span style={{
+                position: 'absolute', bottom: '-6px', left: 0, right: 0, height: '4px',
+                background: 'linear-gradient(90deg, #f97316, #ea580c)',
+                borderRadius: '2px'
+              }} />
+            </span>
+          </h1>
+
+          <h2 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: 400, color: '#a3a3a3', marginBottom: '2rem', minHeight: '2.5rem' }}>
+            <span style={{ color: '#f5f5f5' }}>{displayed}</span>
+            <span style={{ color: '#f97316', animation: 'blink 1s infinite' }}>|</span>
+          </h2>
+
+          <p style={{ fontSize: '1.05rem', color: '#737373', maxWidth: '580px', lineHeight: 1.75, marginBottom: '2.5rem' }}>
+            Software Developer with 1+ year of experience building backend systems using Python, FastAPI, and Django — plus frontend interfaces with React.js. Specialized in large-scale data pipelines, RESTful APIs, and production infrastructure.
+          </p>
+
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <button onClick={() => scrollTo(projectsRef)} style={{
+              padding: '0.85rem 2rem', background: '#f97316', color: '#0a0a0a',
+              border: 'none', borderRadius: '6px', fontWeight: 700, fontSize: '0.95rem',
+              cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.02em'
+            }}
+              onMouseEnter={e => e.target.style.background = '#ea580c'}
+              onMouseLeave={e => e.target.style.background = '#f97316'}
+            >
+              View Projects →
+            </button>
+            <button onClick={() => scrollTo(contactRef)} style={{
+              padding: '0.85rem 2rem', background: 'transparent', color: '#f5f5f5',
+              border: '1px solid #2a2a2a', borderRadius: '6px', fontWeight: 600, fontSize: '0.95rem',
+              cursor: 'pointer', transition: 'all 0.2s'
+            }}
+              onMouseEnter={e => { e.target.style.borderColor = '#f97316'; e.target.style.color = '#f97316'; }}
+              onMouseLeave={e => { e.target.style.borderColor = '#2a2a2a'; e.target.style.color = '#f5f5f5'; }}
+            >
+              Get In Touch
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div style={{ display: 'flex', gap: '3rem', marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid #1f1f1f' }}>
+            {[['1+', 'Year Experience'], ['10+', 'Projects Built']].map(([num, label]) => (
+              <div key={label}>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f97316' }}>{num}</div>
+                <div style={{ fontSize: '0.8rem', color: '#737373', marginTop: '2px' }}>{label}</div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    {/* Projects */}
+      {/* EXPERIENCE */}
+      <section ref={experienceRef} style={{ padding: '6rem 5%' }}>
+        <SectionLabel label="Experience" />
+        <h2 style={sectionTitle}>Where I've Worked</h2>
 
-    <div className='bg-gray-100' ref={Projects}>
-
-      <h2 className='text-blue-500 lg:text-8xl text-3xl lg:px-10 py-10 text-center font-extrabold'><b>Projects</b></h2>
-      
-      <div className='flex flex-wrap justify-center w-auto'>
-      <img
-      src = '../assets/Ecommerce-App.png'
-      alt = 'E-commerce App'
-      className='object-cover rounded-3xl lg:w-55p w-80p m-4 h-auto transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-md hover:shadow-slate-700'
-      />
-      <div className='flex flex-col justify-evenly text-xl lg:w-30p w-80p m-4 overflow-hidden text-black bg-gray-300 rounded-2xl'>
-          <div className='grid grid-cols-3 gap-3 h-auto py-10 lg:px-10 px-5'>
-            <img
-            src = '../assets/ReactJs.png'
-            alt = 'ReactJs'
-            className= 'lg:h-20 h-14 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'/>
-            <img
-            src = '../assets/ExpressJs.png'
-            alt = 'ExpressJs'
-            className= 'lg:h-20 h-14 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'/>
-            <img
-            src = '../assets/Tailwind.png'
-            alt = 'Tailwind'
-            className= 'lg:h-20 h-14 lg:w-20 w-14 object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'/>
-            <img
-            src = '../assets/nodeJs.png'
-            alt = 'nodeJs'
-            className= 'lg:h-20 h-14 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'/>
-            <img
-            src = '../assets/MongoDB.png'
-            alt = 'MongoDB'
-            className= 'lg:h-20 h-14 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'/>
-          </div>
-
-          <p className='w-auto px-10 font-Brush lg:text-xl text-sm'>
-          <i>Developed a responsive E-commerce website where you can buy and sell products create your own user account. Using backend through ExpressJs and frontend using ReactJs</i>
-          </p>
-
-          <div className='flex px-10 py-3'>
-            <a href = 'https://github.com/yash-Devlop/Frags-1'  target="_blank" rel="noreferrer">
-            <img
-            src = '../assets/GithHub.png'
-            alt = 'Github'
-            className= 'lg:h-16 h-10 transition-transform duration-300 ease-in-out transform hover:scale-125'
-            />
-            </a>
-            <a href = 'https://frags-1.vercel.app/'  target="_blank" rel="noreferrer">
-            <FaLink size = '70' className='lg:h-16 h-8 px-4 lg:pt-0 pt-1 transition-transform duration-300 ease-in-out transform hover:scale-125' /> 
-            </a>
-        </div>
-      </div>
-      </div>
-      
-      <div className='flex flex-wrap justify-center w-auto'>
-      <img
-      src = '../assets/Popcorn-App.png'
-      alt = 'Popcorn App'
-      className='object-cover rounded-3xl lg:w-55p w-80p m-4 h-auto transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-md hover:shadow-slate-700'
-      />
-      <div className='flex flex-col justify-evenly text-xl lg:w-30p w-80p m-4 overflow-hidden text-black bg-gray-300 rounded-2xl'>
-        <div className='grid grid-cols-3 gap-3 h-auto py-10 lg:px-10 px-5'>
-          <img
-          src = '../assets/ReactJs.png'
-          alt = 'ReactJs'
-          className= 'lg:h-20 h-14 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/Tailwind.png'
-          alt = 'Tailwind'
-          className= 'lg:h-20 h-14 lg:w-20 w-14 object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/nodeJs.png'
-          alt = 'nodeJs'
-          className= 'lg:h-20 h-14 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-        </div>
-        <p className='w-auto px-10 font-Brush lg:text-xl text-sm'>
-        <i>Developed a responsive movie trailer watching website where you can watch trailers of latest hit and releases.</i>
-        </p>
-        <div className='flex px-10 py-3'>
-        <a href = 'https://github.com/yash-Devlop/popcorn1-main' target="_blank" rel="noreferrer">
-        <img
-        src = '../assets/GithHub.png'
-        alt = 'Github'
-        className= 'lg:h-16 h-10 transition-transform duration-300 ease-in-out transform hover:scale-125'
-        />
-        </a>
-        <a href = 'https://popcorn1-main.vercel.app' target="_blank" rel="noreferrer" >
-        <FaLink size = '70' className='lg:h-16 h-8 px-4 lg:pt-0 pt-1 transition-transform duration-300 ease-in-out transform hover:scale-125' /> 
-        </a>
-        </div>
-      </div>
-      </div>
-    </div>
-
-    {/* Skills */}
-
-    <div className='' ref = {Skills}>
-      <h2 className = 'lg:text-8xl text-4xl lg:py-4 py-2 text-blue-600 flex justify-center'><b>Skills</b></h2>
-      
-      <div className='flex flex-col items-center'>
-        <div className='lg:p-10 p-4 lg:text-2xl text-lg font-extralight'>
-          <p className='lg:py-6'>
-            My name is <b>Yash Gupta</b>. I have completed my B.Tech from Maharishi Dayanand University in Electronics and Communication engineering in 2024.
-          </p>
-          <p className='py-6 lg:py-0'> 
-            Detail-oriented and highly motivated entry-level engineer, seeking a challenging role in Web Development and Software
-            Development <b>(Full-time/Internship)</b>. Eager to apply my technical skills and passion for problem-solving to contribute to
-            innovative projects and grow within a dynamic team.
-          </p>
-        </div>
-        <div className='grid grid-cols-4 lg:gap-10 gap-5 w-auto p-6'>
-        
-          <img
-          src = '../assets/HTML.png'
-          alt = 'HTML'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/CSS.png'
-          alt = 'CSS'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/JavaScript.png'
-          alt = 'JavaScript'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/ReactJs.png'
-          alt = 'ReactJs'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/ExpressJs.png'
-          alt = 'ExpressJs'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/nodeJs.png'
-          alt = 'nodeJs'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/Tailwind.png'
-          alt = 'Tailwind'
-          className= 'lg:h-16 lg:w-16 h-12 w-12 object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/C++.png'
-          alt = 'C++'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/MongoDB.png'
-          alt = 'MongoDB'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-          <img
-          src = '../assets/GithHub.png'
-          alt = 'Git'
-          className= 'lg:h-16 lg:w-auto h-12 w-auto object-contain transition-transform duration-300 ease-in-out transform hover:scale-110'
-          />
-        
-        </div>
-      </div>
-    </div>
-
-    {/* Contact */}
-
-    <div className="container mx-auto bg-gray-500 m-10 lg:p-20 p-8 lg:rounded-3xl" ref={Contact}>
-  <div className="mx-auto">
-    <div className="max-w-md mx-auto px-8 py-6 bg-gray-100 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Contact Us</h2>
-      <form ref={form} onSubmit={sendEmail}>
-        <div className="mb-4">
-
-          <label className="block text-gray-800 mb-1" htmlFor="name">Your Name</label>
-          <input
-            className="w-full px-4 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
-            placeholder="Enter your name"
-            type="text"
-            name="user_name"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-800 mb-1" htmlFor="email">Your Email</label>
-          <input
-            className="w-full px-4 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
-            placeholder="Enter your email"
-            name="user_email"
-            type="email"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-800 mb-1" htmlFor="subject">Subject</label>
-          <input
-            className="w-full px-4 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
-            placeholder="Enter your subject"
-            name="subject"
-            type="text"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-800 mb-1" htmlFor="message"
-            >Your Message</label
-          >
-          <textarea
-            className="w-full px-4 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
-            rows="4"
-            placeholder="Enter your message"
-            name="message"
-          ></textarea>
-        </div>
-        <input
-          className="w-full bg-cyan-700 text-white hover:bg-cyan-500 py-2 px-4 rounded-lg transition duration-300"
-          type="submit"
-          value="Submit"
-        />
-      </form>
-    </div>
-  </div>
-</div>
-
-        <footer>
-              <div className='bg-teal-600 w-full flex flex-col lg:flex-row items-center'>
-                  <button onClick={() => scrollToTarget(main)} className='text-white font-medium hover:text-red-600 text-6xl lg:mt-0 mt-8 mx-10'><i>Yash Gupta</i></button>
-                <div className='lg:mx-20 lg:block flex flex-col my-10'>
-                  <button onClick={() => scrollToTarget(Projects)} className='lg:mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Projects</button>
-                  <button onClick={() => scrollToTarget(Skills)} className='lg:mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Skills</button>
-                  <button onClick={() => scrollToTarget(Contact)} className='lg:mx-4 lg:text-2xl text-3xl my-4 text-[#FACC15] hover:text-[#D1FAE5]'>Contact me</button>
+        <div style={{ maxWidth: '800px', marginTop: '3rem', position: 'relative' }}>
+          <div style={{ position: 'absolute', left: '16px', top: 0, bottom: 0, width: '1px', background: '#1f1f1f' }} />
+          {experience.map((exp, i) => (
+            <div key={i} style={{ paddingLeft: '3.5rem', marginBottom: '3.5rem', position: 'relative' }}>
+              <div style={{
+                position: 'absolute', left: '8px', top: '6px',
+                width: '18px', height: '18px', borderRadius: '50%',
+                background: '#f97316', border: '3px solid #0a0a0a',
+                boxShadow: '0 0 12px rgba(249,115,22,0.5)'
+              }} />
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <h3 style={{ fontWeight: 700, fontSize: '1.15rem', color: '#f5f5f5' }}>{exp.role}</h3>
+                  <p style={{ color: '#f97316', fontWeight: 600, fontSize: '0.95rem', marginTop: '2px' }}>{exp.company}</p>
                 </div>
-                <div className='lg:absolute lg:right-64 lg:my-0 my-6'>
-                  <div className="card">
-                      <a className="social-link2" href = 'https://github.com/yash-Devlop' target='_blank' rel="noreferrer">
-                        <svg viewBox="0 0 496 512" height="1em" fill="#fff" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z">
-                          </path>
-                        </svg></a>
-
-                      <a className="social-link4" href = 'https://linkedin.com/in/yash-gupta-1468a51b2' target='_blank' rel="noreferrer">
-                        <svg fill="#fff" viewBox="0 0 448 512" height="1em" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z">
-                          </path>
-                        </svg>
-                      </a>
-
-                  </div>    
-                  
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ background: '#141414', border: '1px solid #2a2a2a', borderRadius: '4px', padding: '4px 10px', fontSize: '0.8rem', color: '#a3a3a3' }}>{exp.period}</span>
+                  <p style={{ fontSize: '0.8rem', color: '#737373', marginTop: '4px' }}>{exp.location}</p>
                 </div>
               </div>
-        </footer>
-  </div>
+              <ul style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {exp.points.map((pt, j) => (
+                  <li key={j} style={{ display: 'flex', gap: '0.75rem', color: '#a3a3a3', fontSize: '0.9rem', lineHeight: 1.7 }}>
+                    <span style={{ color: '#f97316', flexShrink: 0, marginTop: '2px' }}>▸</span>
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PROJECTS */}
+      <section ref={projectsRef} style={{ padding: '6rem 5%', background: '#0d0d0d' }}>
+        <SectionLabel label="Projects" />
+        <h2 style={sectionTitle}>What I've Built</h2>
+
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: '1.5rem', marginTop: '3rem'
+        }}>
+          {projects.map((p, i) => (
+            <ProjectCard key={i} project={p} />
+          ))}
+        </div>
+      </section>
+
+      {/* SKILLS */}
+      <section ref={skillsRef} style={{ padding: '6rem 5%' }}>
+        <SectionLabel label="Skills" />
+        <h2 style={sectionTitle}>Technical Arsenal</h2>
+
+        <div style={{ marginTop: '3rem', maxWidth: '900px' }}>
+          {/* About blurb */}
+          <div style={{
+            background: '#141414', border: '1px solid #1f1f1f', borderRadius: '12px',
+            padding: '2rem', marginBottom: '3rem', borderLeft: '3px solid #f97316'
+          }}>
+            <p style={{ color: '#a3a3a3', lineHeight: 1.8, fontSize: '0.95rem' }}>
+              B.Tech in Electronics & Communication Engineering from <strong style={{ color: '#f5f5f5' }}>Maharishi Dayanand University</strong> (2024). Detail-oriented and highly motivated software developer with a focus on backend systems, data pipelines, and algorithmic trading infrastructure.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            {skills.map((s, i) => (
+              <SkillCard key={i} skill={s} />
+            ))}
+          </div>
+
+          {/* Tech tags */}
+          <div style={{ marginTop: '3rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#737373', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Also comfortable with</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {['WebSockets', 'REST APIs', 'Pytest', 'Pandas', 'NumPy', 'Linux/Ubuntu', 'PyInstaller', 'MS SQL Server', 'Agile', 'OOP', 'System Design', 'MVC', 'DSA'].map(tag => (
+                <span key={tag} style={{
+                  background: '#141414', border: '1px solid #2a2a2a', borderRadius: '4px',
+                  padding: '4px 12px', fontSize: '0.8rem', color: '#737373'
+                }}>{tag}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section ref={contactRef} style={{ padding: '6rem 5%', background: '#0d0d0d' }}>
+        <SectionLabel label="Contact" />
+        <h2 style={sectionTitle}>Let's Work Together</h2>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem', marginTop: '3rem', maxWidth: '900px' }}>
+          {/* Info */}
+          <div>
+            <p style={{ color: '#a3a3a3', lineHeight: 1.8, marginBottom: '2rem' }}>
+              I'm currently open to full-time roles and internship opportunities. Whether you have a project idea, a job offer, or just want to say hi — my inbox is always open.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {[
+                { label: 'Email', value: 'yash243mac@gmail.com', href: 'mailto:yash243mac@gmail.com' },
+                { label: 'LinkedIn', value: 'linkedin/yash-gupta', href: 'https://linkedin.com/in/yash-gupta-1468a51b2' },
+                { label: 'GitHub', value: 'github/yash-Devlop', href: 'https://github.com/yash-Devlop' },
+              ].map(link => (
+                <a key={link.label} href={link.href} target="_blank" rel="noreferrer" style={{
+                  display: 'flex', gap: '1rem', alignItems: 'center',
+                  color: '#a3a3a3', textDecoration: 'none', transition: 'color 0.2s'
+                }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#f97316'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#a3a3a3'}
+                >
+                  <span style={{ fontSize: '0.7rem', color: '#f97316', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', minWidth: '60px' }}>{link.label}</span>
+                  <span style={{ fontSize: '0.9rem' }}>{link.value}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Form */}
+          <form ref={form} onSubmit={sendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[
+              { label: 'Your Name', name: 'user_name', type: 'text', placeholder: 'Yash Gupta' },
+              { label: 'Your Email', name: 'user_email', type: 'email', placeholder: 'yash@example.com' },
+              { label: 'Subject', name: 'subject', type: 'text', placeholder: 'Project inquiry...' },
+            ].map(field => (
+              <div key={field.name}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#737373', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{field.label}</label>
+                <input
+                  type={field.type} name={field.name} required placeholder={field.placeholder}
+                  style={{
+                    width: '100%', padding: '0.75rem 1rem', background: '#141414',
+                    border: '1px solid #2a2a2a', borderRadius: '6px', color: '#f5f5f5',
+                    fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s'
+                  }}
+                  onFocus={e => e.target.style.borderColor = '#f97316'}
+                  onBlur={e => e.target.style.borderColor = '#2a2a2a'}
+                />
+              </div>
+            ))}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#737373', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Message</label>
+              <textarea
+                name="message" rows={5} required placeholder="Tell me about your project or opportunity..."
+                style={{
+                  width: '100%', padding: '0.75rem 1rem', background: '#141414',
+                  border: '1px solid #2a2a2a', borderRadius: '6px', color: '#f5f5f5',
+                  fontSize: '0.9rem', outline: 'none', resize: 'vertical', boxSizing: 'border-box', transition: 'border-color 0.2s',
+                  fontFamily: 'inherit'
+                }}
+                onFocus={e => e.target.style.borderColor = '#f97316'}
+                onBlur={e => e.target.style.borderColor = '#2a2a2a'}
+              />
+            </div>
+            <button type="submit" disabled={sending} style={{
+              padding: '0.85rem', background: sent ? '#16a34a' : '#f97316',
+              color: '#0a0a0a', border: 'none', borderRadius: '6px',
+              fontWeight: 700, fontSize: '0.95rem', cursor: sending ? 'not-allowed' : 'pointer',
+              transition: 'background 0.2s', opacity: sending ? 0.7 : 1
+            }}
+              onMouseEnter={e => { if (!sending && !sent) e.target.style.background = '#ea580c'; }}
+              onMouseLeave={e => { if (!sending && !sent) e.target.style.background = '#f97316'; }}
+            >
+              {sent ? '✓ Message Sent!' : sending ? 'Sending...' : 'Send Message →'}
+            </button>
+            {error && <p style={{ color: '#f87171', fontSize: '0.85rem' }}>Failed to send. Try emailing directly.</p>}
+          </form>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{
+        padding: '2rem 5%', borderTop: '1px solid #1f1f1f',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', gap: '1rem'
+      }}>
+        <button onClick={() => scrollTo(heroRef)} style={{ fontWeight: 700, fontSize: '1.1rem', color: '#f97316', background: 'none', border: 'none', cursor: 'pointer' }}>YG.</button>
+        <p style={{ color: '#737373', fontSize: '0.85rem' }}>© 2025 Yash Gupta. Designed & Built with ❤️</p>
+        <div style={{ display: 'flex', gap: '1.5rem' }}>
+          {[
+            { label: 'GitHub', href: 'https://github.com/yash-Devlop' },
+            { label: 'LinkedIn', href: 'https://linkedin.com/in/yash-gupta-1468a51b2' },
+            { label: 'Email', href: 'mailto:yash243mac@gmail.com' },
+          ].map(l => (
+            <a key={l.label} href={l.href} target="_blank" rel="noreferrer" style={{
+              color: '#737373', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s'
+            }}
+              onMouseEnter={e => e.target.style.color = '#f97316'}
+              onMouseLeave={e => e.target.style.color = '#737373'}
+            >{l.label}</a>
+          ))}
+        </div>
+      </footer>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0a; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+        ::placeholder { color: #404040; }
+      `}</style>
+    </div>
+  );
+}
+
+// Sub-components
+const sectionTitle = {
+  fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontWeight: 800,
+  letterSpacing: '-0.03em', marginTop: '0.5rem', color: '#f5f5f5'
+};
+
+function SectionLabel({ label }) {
+  return (
+    <span style={{
+      fontSize: '0.75rem', fontWeight: 700, color: '#f97316',
+      textTransform: 'uppercase', letterSpacing: '0.15em',
+      fontFamily: "'JetBrains Mono', monospace"
+    }}>
+      // {label}
+    </span>
+  );
+}
+
+function ProjectCard({ project }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: '#141414',
+        border: `1px solid ${hovered ? '#f97316' : '#1f1f1f'}`,
+        borderRadius: '12px', padding: '1.75rem',
+        transition: 'all 0.25s', cursor: 'default',
+        transform: hovered ? 'translateY(-4px)' : 'none',
+        boxShadow: hovered ? '0 16px 48px rgba(249,115,22,0.1)' : 'none'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+        <span style={{ fontSize: '1.5rem', color: '#f97316' }}>◈</span>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {project.github && (
+            <a href={project.github} target="_blank" rel="noreferrer" style={{ color: '#737373', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }}
+              onMouseEnter={e => e.target.style.color = '#f97316'}
+              onMouseLeave={e => e.target.style.color = '#737373'}>
+              GitHub ↗
+            </a>
+          )}
+          {project.live && (
+            <a href={project.live} target="_blank" rel="noreferrer" style={{ color: '#737373', textDecoration: 'none', fontSize: '0.85rem', transition: 'color 0.2s' }}
+              onMouseEnter={e => e.target.style.color = '#f97316'}
+              onMouseLeave={e => e.target.style.color = '#737373'}>
+              Live ↗
+            </a>
+          )}
+        </div>
+      </div>
+      <h3 style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '0.75rem', color: '#f5f5f5' }}>{project.name}</h3>
+      <p style={{ color: '#737373', fontSize: '0.875rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>{project.desc}</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+        {project.tech.map(t => (
+          <span key={t} style={{
+            background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)',
+            borderRadius: '3px', padding: '3px 8px', fontSize: '0.75rem',
+            color: '#f97316', fontFamily: "'JetBrains Mono', monospace"
+          }}>{t}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SkillCard({ skill }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: '#141414', border: `1px solid ${hovered ? '#f97316' : '#1f1f1f'}`,
+        borderRadius: '10px', padding: '1.25rem', transition: 'all 0.2s'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+        <span style={{ fontSize: '0.9rem', color: '#f5f5f5', fontWeight: 600 }}>{skill.icon} {skill.name}</span>
+        <span style={{ fontSize: '0.75rem', color: '#f97316', fontWeight: 700 }}>{skill.level}%</span>
+      </div>
+      <div style={{ height: '3px', background: '#2a2a2a', borderRadius: '2px', overflow: 'hidden' }}>
+        <div style={{
+          height: '100%', width: `${skill.level}%`,
+          background: 'linear-gradient(90deg, #f97316, #ea580c)',
+          borderRadius: '2px', transition: 'width 0.5s ease'
+        }} />
+      </div>
+    </div>
   );
 }
 
