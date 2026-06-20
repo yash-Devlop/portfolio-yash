@@ -21,6 +21,7 @@ function App() {
   const [charIdx, setCharIdx] = useState(0);
   const [deleting, setDeleting] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const speed = deleting ? 40 : 90;
     const timer = setTimeout(() => {
