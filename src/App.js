@@ -2,6 +2,8 @@ import React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 
+const roles = ["Software Developer.", "Backend Engineer.", "Full-Stack Developer.", "Python Developer.", "Problem Solver."];
+
 function App() {
   const heroRef = useRef(null);
   const projectsRef = useRef(null);
@@ -15,7 +17,6 @@ function App() {
     }
   };
 
-  const roles = ["Software Developer.", "Backend Engineer.", "Full-Stack Developer.", "Python Developer.", "Problem Solver."];
   const [displayed, setDisplayed] = useState("");
   const [roleIdx, setRoleIdx] = useState(0);
   const [charIdx, setCharIdx] = useState(0);
@@ -506,7 +507,7 @@ function SectionLabel({ label }) {
       textTransform: 'uppercase', letterSpacing: '0.15em',
       fontFamily: "'JetBrains Mono', monospace"
     }}>
-      // {label}
+      {`// ${label}`}
     </span>
   );
 }
